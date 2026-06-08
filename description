@@ -1,0 +1,264 @@
+#!/usr/bin/env python3
+"""
+Flag Encoder - Display country flags using different encoding methods
+User enters a country name and sees the flag encoded in:
+- Binary codes
+- ASCII numbers
+- Unicode characters
+- Keyboard symbols
+- Braille characters
+- Morse code
+"""
+
+import re
+from typing import Dict, List, Optional
+
+# Country to flag emoji mapping
+COUNTRY_FLAGS = {
+    'united states': '🇺🇸',
+    'usa': '🇺🇸',
+    'canada': '🇨🇦',
+    'mexico': '🇲🇽',
+    'france': '🇫🇷',
+    'germany': '🇩🇪',
+    'uk': '🇬🇧',
+    'united kingdom': '🇬🇧',
+    'spain': '🇪🇸',
+    'italy': '🇮🇹',
+    'japan': '🇯🇵',
+    'china': '🇨🇳',
+    'india': '🇮🇳',
+    'brazil': '🇧🇷',
+    'australia': '🇦🇺',
+    'south korea': '🇰🇷',
+    'korea': '🇰🇷',
+    'russia': '🇷🇺',
+    'pakistan': '🇵🇰',
+    'afghanistan': '🇦🇫',
+    'egypt': '🇪🇬',
+    'south africa': '🇿🇦',
+    'nigeria': '🇳🇬',
+    'kenya': '🇰🇪',
+    'thailand': '🇹🇭',
+    'vietnam': '🇻🇳',
+    'philippines': '🇵🇭',
+    'indonesia': '🇮🇩',
+    'singapore': '🇸🇬',
+    'malaysia': '🇲🇾',
+    'new zealand': '🇳🇿',
+    'greece': '🇬🇷',
+    'portugal': '🇵🇹',
+    'switzerland': '🇨🇭',
+    'sweden': '🇸🇪',
+    'norway': '🇳🇴',
+    'denmark': '🇩🇰',
+    'finland': '🇫🇮',
+    'turkey': '🇹🇷',
+    'israel': '🇮🇱',
+    'iran': '🇮🇷',
+    'iraq': '🇮🇶',
+    'saudi arabia': '🇸🇦',
+    'uae': '🇦🇪',
+    'united arab emirates': '🇦🇪',
+    'chile': '🇨🇱',
+    'argentina': '🇦🇷',
+    'peru': '🇵🇪',
+    'colombia': '🇨🇴',
+}
+
+# Morse code mapping
+MORSE_CODE_DICT = {
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+    'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+    'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+    'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+    'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---',
+    '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+    '8': '---..', '9': '----.', ' ': '/'
+}
+
+# Braille mapping (simplified)
+BRAILLE_DICT = {
+    'A': '⠁', 'B': '⠃', 'C': '⠉', 'D': '⠙', 'E': '⠑', 'F': '⠋', 'G': '⠛',
+    'H': '⠓', 'I': '⠊', 'J': '⠚', 'K': '⠅', 'L': '⠇', 'M': '⠍', 'N': '⠝',
+    'O': '⠕', 'P': '⠏', 'Q': '⠟', 'R': '⠗', 'S': '⠎', 'T': '⠞', 'U': '⠥',
+    'V': '⠧', 'W': '⠺', 'X': '⠭', 'Y': '⠽', 'Z': '⠵', ' ': ' '
+}
+
+# Keyboard symbols mapping
+KEYBOARD_SYMBOLS = {
+    'A': '!', 'B': '@', 'C': '#', 'D': '$', 'E': '%', 'F': '^', 'G': '&',
+    'H': '*', 'I': '(', 'J': ')', 'K': '-', 'L': '=', 'M': '[', 'N': ']',
+    'O': '{', 'P': '}', 'Q': ';', 'R': ':', 'S': "'", 'T': '"', 'U': '<',
+    'V': '>', 'W': ',', 'X': '.', 'Y': '?', 'Z': '/'
+}
+
+
+class FlagEncoder:
+    """Encodes country flags in various formats"""
+    
+    def __init__(self):
+        self.flag = None
+        self.country = None
+    
+    def find_country(self, user_input: str) -> Optional[str]:
+        """Find country flag by user input"""
+        user_input = user_input.lower().strip()
+        
+        if user_input in COUNTRY_FLAGS:
+            self.country = user_input
+            self.flag = COUNTRY_FLAGS[user_input]
+            return self.flag
+        
+        # Try partial matching
+        for country, flag in COUNTRY_FLAGS.items():
+            if user_input in country or country.startswith(user_input):
+                self.country = country
+                self.flag = flag
+                return self.flag
+        
+        return None
+    
+    def to_binary(self, text: str) -> str:
+        """Convert text to binary representation"""
+        return ' '.join(format(ord(char), '08b') for char in text)
+    
+    def to_ascii(self, text: str) -> str:
+        """Convert text to ASCII numbers"""
+        return ' '.join(str(ord(char)) for char in text)
+    
+    def to_unicode(self, text: str) -> str:
+        """Convert text to Unicode code points"""
+        return ' '.join(f'U+{ord(char):04X}' for char in text)
+    
+    def to_morse(self, text: str) -> str:
+        """Convert text to Morse code"""
+        morse = []
+        for char in text.upper():
+            if char in MORSE_CODE_DICT:
+                morse.append(MORSE_CODE_DICT[char])
+            else:
+                morse.append('?')
+        return ' | '.join(morse)
+    
+    def to_braille(self, text: str) -> str:
+        """Convert text to Braille"""
+        braille = []
+        for char in text.upper():
+            if char in BRAILLE_DICT:
+                braille.append(BRAILLE_DICT[char])
+            else:
+                braille.append('?')
+        return ''.join(braille)
+    
+    def to_keyboard(self, text: str) -> str:
+        """Convert text to keyboard symbols"""
+        keyboard = []
+        for char in text.upper():
+            if char in KEYBOARD_SYMBOLS:
+                keyboard.append(KEYBOARD_SYMBOLS[char])
+            else:
+                keyboard.append('?')
+        return ''.join(keyboard)
+    
+    def display_all_encodings(self):
+        """Display flag in all encoding formats"""
+        if not self.flag:
+            print("❌ Flag not found!")
+            return
+        
+        print("\n" + "="*60)
+        print(f"🌍 Country: {self.country.upper()}")
+        print(f"📍 Flag: {self.flag}")
+        print("="*60 + "\n")
+        
+        print("📊 ENCODINGS:\n")
+        
+        # Binary
+        binary = self.to_binary(self.flag)
+        print(f"🔢 BINARY CODE:")
+        print(f"   {binary}")
+        print()
+        
+        # ASCII
+        ascii_code = self.to_ascii(self.flag)
+        print(f"🔤 ASCII NUMBERS:")
+        print(f"   {ascii_code}")
+        print()
+        
+        # Unicode
+        unicode_code = self.to_unicode(self.flag)
+        print(f"🌐 UNICODE CODE POINTS:")
+        print(f"   {unicode_code}")
+        print()
+        
+        # Morse
+        morse = self.to_morse(self.flag)
+        print(f"📡 MORSE CODE:")
+        print(f"   {morse}")
+        print()
+        
+        # Braille
+        braille = self.to_braille(self.flag)
+        print(f"⠿ BRAILLE:")
+        print(f"   {braille}")
+        print()
+        
+        # Keyboard
+        keyboard = self.to_keyboard(self.flag)
+        print(f"⌨️  KEYBOARD SYMBOLS:")
+        print(f"   {keyboard}")
+        print()
+        
+        print("="*60)
+
+
+def display_available_countries():
+    """Display list of available countries"""
+    countries = sorted(set(COUNTRY_FLAGS.keys()))
+    print("\n✅ AVAILABLE COUNTRIES:")
+    print("-" * 40)
+    for i, country in enumerate(countries, 1):
+        if i % 3 == 0:
+            print(f"{country.upper()}")
+        else:
+            print(f"{country.upper():25}", end=" | ")
+    print("\n")
+
+
+def main():
+    """Main program loop"""
+    print("\n" + "🚀" * 20)
+    print("   🌍 WELCOME TO FLAG ENCODER 🌍   ")
+    print("🚀" * 20)
+    print("\nEncode country flags in different formats!")
+    print("(Type 'list' to see available countries, 'quit' to exit)\n")
+    
+    encoder = FlagEncoder()
+    
+    while True:
+        try:
+            country_input = input("🔍 Enter a country name: ").strip()
+            
+            if country_input.lower() == 'quit':
+                print("\n👋 Goodbye!\n")
+                break
+            
+            if country_input.lower() == 'list':
+                display_available_countries()
+                continue
+            
+            if encoder.find_country(country_input):
+                encoder.display_all_encodings()
+            else:
+                print(f"❌ Country '{country_input}' not found. Type 'list' to see available countries.\n")
+        
+        except KeyboardInterrupt:
+            print("\n\n👋 Goodbye!\n")
+            break
+        except Exception as e:
+            print(f"❌ Error: {e}\n")
+
+
+if __name__ == "__main__":
+    main()
